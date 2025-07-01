@@ -240,7 +240,7 @@ pip install -e .
 to generate demo with img obs, follow: https://mimicgen.github.io/docs/tutorials/reproducing_experiments.html
 
 
-## ## Multi-GPU Training
+## Multi-GPU Training
 
 Use accelerate launch:
 
