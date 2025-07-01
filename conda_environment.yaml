@@ -1,0 +1,68 @@
+name: equidiffpo
+channels:
+  - pytorch
+  - pytorch3d
+  - nvidia
+  - conda-forge
+  - pyg
+  - dglteam/label/th21_cu118
+dependencies:
+  - python=3.9
+  - pip=22.2.2
+  - pytorch=2.1.0
+  - torchaudio=2.1.0
+  - torchvision=0.16.0
+  - pytorch-cuda=11.8
+  - pytorch3d=0.7.5
+  - numpy=1.23.3
+  - numba==0.56.4
+  - scipy==1.9.1
+  - py-opencv=4.6.0
+  - cffi=1.15.1
+  - ipykernel=6.16
+  - matplotlib=3.6.1
+  - zarr=2.12.0
+  - numcodecs=0.10.2
+  - h5py=3.7.0
+  - hydra-core=1.2.0
+  - einops=0.4.1
+  - tqdm=4.64.1
+  - dill=0.3.5.1
+  - scikit-video=1.1.11
+  - scikit-image=0.19.3
+  - gym=0.21.0
+  - pymunk=6.2.1
+  - threadpoolctl=3.1.0
+  - shapely=1.8.4
+  - cython=0.29.32
+  - imageio=2.22.0
+  - imageio-ffmpeg=0.4.7
+  - termcolor=2.0.1
+  - tensorboard=2.10.1
+  - tensorboardx=2.5.1
+  - psutil=5.9.2
+  - click=8.0.4
+  - boto3=1.24.96
+  - accelerate=0.13.2
+  - datasets=2.6.1
+  - diffusers=0.11.1
+  - av=10.0.0
+  - cmake=3.24.3
+  # trick to avoid cpu affinity issue described in https://github.com/pytorch/pytorch/issues/99625
+  - llvm-openmp=14
+  # trick to force reinstall imagecodecs via pip
+  - imagecodecs==2022.8.8
+  - e3nn
+  - dgl
+  - pytorch-cluster
+  - pytorch-scatter
+  - pip:
+    - open3d
+    - wandb==0.17.0
+    - pygame
+    - imagecodecs==2022.9.26
+    - escnn
+    - torch_geometric
+    - robosuite @ https://github.com/ARISE-Initiative/robosuite/archive/b9d8d3de5e3dfd1724f4a0e6555246c460407daa.tar.gz
+    - robomimic @ https://github.com/pointW/robomimic/archive/8aad5b3caaaac9289b1504438a7f5d3a76d06c07.tar.gz
+    - robosuite-task-zoo  @ https://github.com/pointW/robosuite-task-zoo/archive/0f8a7b2fa5d192e4e8800bebfe8090b28926f3ed.tar.gz

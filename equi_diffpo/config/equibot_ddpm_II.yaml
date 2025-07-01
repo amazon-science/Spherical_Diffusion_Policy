@@ -1,0 +1,154 @@
+defaults:
+  - _self_
+  - task: mimicgen_pc_abs
+
+name: train_step
+_target_: equi_diffpo.workspace.train_equibot_workspace.TrainEquiBotWorkspace
+
+shape_meta: ${task.shape_meta}
+exp_name: "debug"
+
+task_name: stack_d1
+n_demo: 100
+horizon: 16
+n_obs_steps: 2
+n_action_steps: 8
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+keypoint_visible_rate: 1.0
+obs_as_global_cond: True
+dataset_target: equi_diffpo.dataset.robomimic_replay_point_cloud_gripper_equal_scale_dataset.RobomimicReplayPointCloudGripperEqualScaleDataset
+dataset_path: data/robomimic/datasets/${task_name}/${task_name}_pc_abs.hdf5
+
+policy:
+  _target_: equi_diffpo.policy.equibot.EquiBot
+  condition_type: film
+  canonicalize: false
+  rot_aug: [5, 5, 180]
+  rad_aug: 0
+  diffusion_step_embed_dim: 128
+  down_dims:
+  - 256
+  - 512
+  - 1024
+  encoder_output_dim: 256
+  horizon: ${horizon}
+  kernel_size: 5
+  n_action_steps: ${n_action_steps}
+  obs_as_global_cond: true
+  shape_meta: ${shape_meta}
+  use_pc_color: true
+  n_obs_steps: ${n_obs_steps}
+  model_cfg:
+    c_dim: 128
+    scale_cano:  # will be determined by policy.canonicalize
+    mean_cano:  # will be determined by policy.canonicalize
+    backbone_type: vn_pointnet
+    backbone_args:
+      h_dim: 128
+      c_dim: 128
+      num_layers: 5
+      knn: 16
+      use_rgb: ${policy.use_pc_color}
+
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    variance_type: fixed_small # Yilun's paper uses fixed_small_log instead, but easy to cause Nan
+    clip_sample: True # required when predict_epsilon=False
+    prediction_type: epsilon # or sample
+  num_inference_steps: 100
+
+
+
+ema:
+  _target_: equi_diffpo.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+dataloader:
+  batch_size: 64
+  num_workers: 4
+  shuffle: True
+  pin_memory: True
+  persistent_workers: True
+
+val_dataloader:
+  batch_size: 64
+  num_workers: 4
+  shuffle: False
+  pin_memory: True
+  persistent_workers: True
+
+# Original EquiBot
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 3.0e-5
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
+
+## STEP's setup
+#optimizer:
+#  _target_: torch.optim.AdamW
+#  lr: 1.0e-4
+#  betas: [0.95, 0.999]
+#  eps: 1.0e-8
+#  weight_decay: 1.0e-6
+
+training:
+  device: "cuda:0"
+  seed: 42
+  debug: False
+  resume: True
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  num_epochs: ${eval:'50000 / ${n_demo}'}
+  gradient_accumulate_every: 1
+  use_ema: True
+  rollout_every: ${eval:'1000 / ${n_demo}'}
+  checkpoint_every: ${eval:'1000 / ${n_demo}'}
+  val_every: 1
+  sample_every: 5
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+
+logging:
+  project: STEP_MimicGen
+  resume: true
+  mode: online
+  name: ${now:%m%d%H%M}_equibot_${task_name}_${n_demo}
+  tags: ["${name}", "${task_name}", "${exp_name}"]
+  id: null
+  group: null
+
+
+checkpoint:
+  save_ckpt: False # if True, save checkpoint every checkpoint_every
+  topk:
+    monitor_key: test_mean_score
+    mode: max
+    k: 1
+    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+  save_last_ckpt: True # this only saves when save_ckpt is True
+  save_last_snapshot: False
+
+multi_run:
+  run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_equibot_${name}_${task_name}
+  wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_equibot_${name}_${task_name}
+
+hydra:
+  job:
+    override_dirname: ${name}
+  run:
+    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_equibot_${name}_${task_name}
+  sweep:
+    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_equibot_${name}_${task_name}
+    subdir: ${hydra.job.num}

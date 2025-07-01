@@ -1,0 +1,24 @@
+NOTICE
+
+This project includes components from the following third-party projects:
+
+1. EquiformerV2  
+   - Repository: https://github.com/atomicarchitects/equiformer_v2  
+   - License: MIT License  
+
+2. Equivariant Diffusion Policy  
+   - Repository: https://github.com/pointW/equidiff  
+   - License: Creative Commons Attribution 4.0 International (CC BY 4.0)  
+
+3. Diffusion Policy  
+   - Repository: https://github.com/real-stanford/diffusion_policy  
+   - License: MIT License  
+
+4. ACT (Action Chunking Transformer)  
+   - Repository: https://github.com/tonyzhaozh/act  
+   - License: MIT License  
+
+5. MimicGen  
+   - Repository: https://github.com/NVlabs/mimicgen  
+   - Code License: NVIDIA Source Code License  
+   - Dataset License: Creative Commons Attribution 4.0 International (CC BY 4.0)  
