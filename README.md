@@ -1,3 +1,4 @@
+![](image/xupeng_sdp.png){: .align-right width="200px"}
 # Spherical Diffusion Policy
 By [Xupeng Zhu](https://zxp-s-works.github.io/), [Fan Wang](), [Robin Walters](https://www.robinwalters.com/), and [Jane Shi]()
 
