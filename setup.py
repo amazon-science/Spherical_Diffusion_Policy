@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
 setup(
-  name = 'equi_diffpo',
+  name = 'sdp',
   packages = find_packages(),
 )

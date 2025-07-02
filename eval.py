@@ -16,7 +16,7 @@ import torch
 import dill
 import wandb
 import json
-from equi_diffpo.workspace.base_workspace import BaseWorkspace
+from sdp.workspace.base_workspace import BaseWorkspace
 
 @click.command()
 @click.option('-c', '--checkpoint', required=True)
