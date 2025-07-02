@@ -1,8 +1,9 @@
-![](image/xupeng_sdp.png){: .align-right width="200px"}
 # Spherical Diffusion Policy
 By [Xupeng Zhu](https://zxp-s-works.github.io/), [Fan Wang](), [Robin Walters](https://www.robinwalters.com/), and [Jane Shi]()
 
 Official implementation for [**Spherical Diffusion Policy: A SE(3) Equivariant Visuomotor Policy with Spherical Fourier Representation**](https://openreview.net/forum?id=U5nRMOs8Ed), to appear at **ICML 2025**. We provide [a 5min summary video](https://recorder-v3.slideslive.com/?share=102381&s=e55f418c-393e-451f-a47e-c25b41d009e5).
+
+![](image/SDP.png)
 
 Spherical Diffusion Policy (SDP) is a SE(3) equivariant and T(3) invariant visuomotor policy that leverages spherical Fourier representations to achieve strong 3D generalization in robotic manipulation tasks. SDP introduces three key components:
 1. **Spherical Fourier Representations** for encoding the robot's state and actions with continuous rotational equivariance.
