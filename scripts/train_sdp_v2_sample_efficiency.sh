@@ -9,8 +9,7 @@ seed=42
 cd ..
 
 g=0
-for n_demo in 32 100;
-#for n_demo in 316 1000;
+for n_demo in 100 316 1000;
 do
 
 # sdp v2

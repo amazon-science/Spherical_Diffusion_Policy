@@ -12,7 +12,7 @@ sys.stderr = open(sys.stderr.fileno(), mode='w', buffering=1)
 import hydra
 from omegaconf import OmegaConf
 import pathlib
-from equi_diffpo.workspace.base_workspace import BaseWorkspace
+from sdp.workspace.base_workspace import BaseWorkspace
 
 max_steps = {
     'stack_d1': 400,
@@ -61,7 +61,7 @@ OmegaConf.register_new_resolver("eval", eval, replace=True)
 @hydra.main(
     version_base=None,
     config_path=str(pathlib.Path(__file__).parent.joinpath(
-        'equi_diffpo','config'))
+        'sdp','config'))
 )
 def main(cfg: OmegaConf):
     # resolve immediately so all the ${now:} resolvers
