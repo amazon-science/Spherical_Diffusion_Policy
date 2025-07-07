@@ -1,0 +1,159 @@
+defaults:
+  - _self_
+  - task: mimicgen_pc_abs
+
+name: train_step
+_target_: sdp.workspace.train_step_workspace.TrainSTEPWorkspace
+
+shape_meta: ${task.shape_meta}
+exp_name: "debug"
+
+task_name: stack_d1
+n_demo: 100
+horizon: 16
+n_obs_steps: 2
+n_action_steps: 8
+n_latency_steps: 0
+dataset_obs_steps: ${n_obs_steps}
+keypoint_visible_rate: 1.0
+obs_as_global_cond: True
+dataset_target: sdp.dataset.robomimic_replay_point_cloud_gripper_equal_scale_dataset.RobomimicReplayPointCloudGripperEqualScaleDataset
+dataset_path: data/robomimic/datasets/${task_name}/${task_name}_pc_abs.hdf5
+
+policy:
+  _target_: sdp.policy.step.STEP
+  condition_type: film
+  use_down_condition: true
+  use_mid_condition: true
+  use_up_condition: true
+  canonicalize: true
+  rot_aug: [5, 5, 180]
+  rad_aug: 0
+  pcd_noise: 0
+  norm: false
+  lmax: 2
+  mmax: 2
+  FiLM_type: SFiLM
+  v_grid_resolution:
+  d_grid_resolution:
+  denoise_nn: irrep
+  max_neighbors: [16, 16, 16, 16, 128]
+  max_radius: [3, 3, 3, 3, 3]
+  # n_pts: 1024, 512, 256, 128, 64, 1
+  pool_ratio: [0.5, 0.5, 0.5, 0.5]  # the last pool_ratio is adaptive
+  sphere_channels: [16, 32, 64, 128, 256]
+  attn_hidden_channels: [16, 32, 64, 128, 256]
+  attn_alpha_channels: [4, 8, 16, 32, 64]
+  attn_value_channels: [2, 4, 8, 16, 32]
+  ffn_hidden_channels: [32, 64, 128, 256, 512]
+  edge_channels: [8, 16, 32, 64, 128]
+  num_distance_basis: [128, 128, 128, 128, 128]
+  diffusion_step_embed_dim: 128
+  down_dims:
+  - 200
+  - 400
+  - 800
+  encoder_output_dim: 128
+  horizon: ${horizon}
+  kernel_size: 5
+  n_action_steps: ${n_action_steps}
+  n_groups: 8
+  n_obs_steps: ${n_obs_steps}
+  pool_method: fpsknn
+
+  noise_scheduler:
+    _target_: diffusers.schedulers.scheduling_ddpm.DDPMScheduler
+    num_train_timesteps: 100
+    beta_start: 0.0001
+    beta_end: 0.02
+    beta_schedule: squaredcos_cap_v2
+    variance_type: fixed_small # Yilun's paper uses fixed_small_log instead, but easy to cause Nan
+    clip_sample: True # required when predict_epsilon=False
+    prediction_type: epsilon # or sample
+  num_inference_steps: 100
+
+  obs_as_global_cond: true
+  shape_meta: ${shape_meta}
+
+  use_pc_color: true
+
+
+
+ema:
+  _target_: sdp.model.diffusion.ema_model.EMAModel
+  update_after_step: 0
+  inv_gamma: 1.0
+  power: 0.75
+  min_value: 0.0
+  max_value: 0.9999
+
+dataloader:
+  batch_size: 32
+  num_workers: 4
+  shuffle: True
+  pin_memory: True
+  persistent_workers: True
+
+val_dataloader:
+  batch_size: 32
+  num_workers: 4
+  shuffle: False
+  pin_memory: True
+  persistent_workers: True
+
+optimizer:
+  _target_: torch.optim.AdamW
+  lr: 1.0e-4
+  betas: [0.95, 0.999]
+  eps: 1.0e-8
+  weight_decay: 1.0e-6
+
+training:
+  device: "cuda:0"
+  seed: 42
+  debug: False
+  resume: True
+  lr_scheduler: cosine
+  lr_warmup_steps: 500
+  num_epochs: ${eval:'round(50000 / ${n_demo})'}
+  gradient_accumulate_every: 1
+  use_ema: True
+  rollout_every: ${eval:'round(1000 / ${n_demo})'}
+  checkpoint_every: ${eval:'round(1000 / ${n_demo})'}
+  val_every: 1
+  sample_every: 5
+  max_train_steps: null
+  max_val_steps: null
+  tqdm_interval_sec: 1.0
+
+logging:
+  project: SDP_Tilted_Table
+  resume: true
+  mode: online
+  name: ${now:%m%d_%H%M}_sdp_${task_name}_${n_demo}
+  tags: ["${name}", "${task_name}", "${exp_name}"]
+  id: null
+  group: null
+
+checkpoint:
+  save_ckpt: False # if True, save checkpoint every checkpoint_every
+  topk:
+    monitor_key: test_mean_score
+    mode: max
+    k: 1
+    format_str: 'epoch={epoch:04d}-test_mean_score={test_mean_score:.3f}.ckpt'
+  save_last_ckpt: True # this only saves when save_ckpt is True
+  save_last_snapshot: False
+
+multi_run:
+  run_dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+  wandb_name_base: ${now:%Y.%m.%d-%H.%M.%S}_${name}_${task_name}
+
+hydra:
+  job:
+    override_dirname: ${name}
+  run:
+    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+  sweep:
+    dir: data/outputs/${now:%Y.%m.%d}/${now:%H.%M.%S}_${name}_${task_name}
+    subdir: ${hydra.job.num}
