@@ -1,7 +1,7 @@
 # Spherical Diffusion Policy
 By [Xupeng Zhu](https://zxp-s-works.github.io/), [Fan Wang](https://faninedinburgh.wixsite.com/mysite-1/publications), [Robin Walters](https://www.robinwalters.com/), and [Jane Shi]()
 
-[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/se-3-equivariant-diffusion-policy-in/imitation-learning-on-mimicgen-1)](https://paperswithcode.com/sota/imitation-learning-on-mimicgen-1?p=se-3-equivariant-diffusion-policy-in)
+[![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/se-3-equivariant-diffusion-policy-in/robot-manipulation-on-mimicgen)](https://paperswithcode.com/sota/robot-manipulation-on-mimicgen?p=se-3-equivariant-diffusion-policy-in)
 
 Official implementation for [**Spherical Diffusion Policy: A SE(3) Equivariant Visuomotor Policy with Spherical Fourier Representation**](https://openreview.net/forum?id=U5nRMOs8Ed), to appear at **ICML 2025**.
 
