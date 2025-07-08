@@ -3,7 +3,7 @@ By [Xupeng Zhu](https://zxp-s-works.github.io/), [Fan Wang](https://faninedinbur
 
 [![PWC](https://img.shields.io/endpoint.svg?url=https://paperswithcode.com/badge/se-3-equivariant-diffusion-policy-in/robot-manipulation-on-mimicgen)](https://paperswithcode.com/sota/robot-manipulation-on-mimicgen?p=se-3-equivariant-diffusion-policy-in)
 
-Official implementation for [**Spherical Diffusion Policy: A SE(3) Equivariant Visuomotor Policy with Spherical Fourier Representation**](https://openreview.net/forum?id=U5nRMOs8Ed), to appear at **ICML 2025**.
+Official implementation for [**Spherical Diffusion Policy: A SE(3) Equivariant Visuomotor Policy with Spherical Fourier Representation**](https://arxiv.org/abs/2507.01723), to appear at **ICML 2025**.
 
 [Arxiv](https://arxiv.org/abs/2507.01723) ｜ [5min summary video](https://recorder-v3.slideslive.com/?share=102381&s=e55f418c-393e-451f-a47e-c25b41d009e5) | [OpenReview](https://openreview.net/forum?id=U5nRMOs8Ed)
 
