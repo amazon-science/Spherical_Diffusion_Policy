@@ -1,0 +1,53 @@
+# Dependabot configuration.
+#
+# Scope note, because the two halves of Dependabot are configured in different places:
+#   * Dependabot ALERTS and SECURITY updates are enabled in repository Settings
+#     (Settings -> Code security), NOT in this file. They require a dependency-graph entry,
+#     which is why requirements.txt exists.
+#   * Dependabot VERSION updates (proactive bumps) are what this file configures.
+#
+# Only ecosystems with a manifest that GitHub can actually detect are listed here. An entry whose
+# manifest cannot be found surfaces as a Dependabot configuration error.
+#
+# Deliberately NOT listed: package-ecosystem "conda". It is a valid ecosystem value, but GitHub's
+# documentation does not state which filename the conda ecosystem detects, and this repository's file
+# is named conda_environment.yaml rather than the conventional environment.yml. Add it only after
+# confirming detection in the Dependabot job logs (Insights -> Dependency graph -> Dependabot).
+#
+# NO `ignore` RULES, DELIBERATELY. This stack is pinned to 2022-2023 versions on
+# python 3.9, so some major bumps cannot possibly install (numpy 2.x breaks
+# numba 0.56.4; scipy >= 1.14 and several others require python >= 3.10). The
+# tempting fix is an `ignore` block for those majors. It is not used here
+# because `ignore` is a filter that also wins over `allow`, and suppressing a
+# dependency means a genuine critical advisory for it would simply never be
+# offered -- an absence of alerts that looks identical to safety.
+#
+# Instead, CI is the gate: a bump that cannot install, or that breaks the
+# equivariance or import tests, turns the required check red and the Auto-Merge
+# app does not merge it. That fails safe and leaves a visible, triageable pull
+# request rather than a silent coverage hole.
+version: 2
+updates:
+  # Python dependencies declared in requirements.txt.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "python"
+    commit-message:
+      prefix: "deps"
+
+  # The CI workflow's own actions. Keeping these current is itself a supply-chain control,
+  # since a compromised or stale action runs with access to the workflow.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github-actions"
+    commit-message:
+      prefix: "ci"

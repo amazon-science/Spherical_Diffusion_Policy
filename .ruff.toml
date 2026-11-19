@@ -1,0 +1,54 @@
+# Ruff configuration for the CI lint gate (.github/workflows/ci.yml).
+#
+# Kept in `.ruff.toml` rather than `pyproject.toml` on purpose: this repository
+# has no PEP 621 pyproject.toml, and adding one would change what GitHub's
+# dependency graph and Dependabot's pip ecosystem try to parse. A dedicated ruff
+# file is invisible to dependency tooling.
+#
+# WHY SUCH A NARROW RULE SET
+# Ruff's default rules report 1744 findings on this tree, which has never been
+# linted. A gate that red on day one would block every automated Dependabot
+# security pull request -- the precise failure this repository's `auto-merge`
+# remediation path is meant to avoid. So the gate selects only rules that
+# indicate real breakage rather than style:
+#
+#   E9   syntax errors / IO errors
+#   F63  bad comparisons (e.g. `assert (x, y)`, which is always true)
+#   F7   misplaced statements (e.g. `break` outside a loop)
+#   F82  undefined names -- a NameError waiting to happen
+#
+# These are also exactly the rules that catch a dependency bump removing a
+# symbol the code still references.
+target-version = "py39"
+
+[lint]
+select = ["E9", "F63", "F7", "F82"]
+
+# ---------------------------------------------------------------------------
+# PRE-EXISTING DEFECTS, BASELINED -- not suppressed because they are acceptable,
+# but because they predate this gate and fixing them needs the authors' intent,
+# not a security PR's.
+#
+# Each entry is a genuine latent bug: the name is undefined at that point, so
+# the line raises NameError if it is ever reached. They are worth a separate
+# issue. New violations anywhere else in the tree still fail the gate, which is
+# the point of baselining rather than dropping the rules.
+#
+#   sdp/common/pymunk_override.py:39      F822 `lighten` exported in __all__ but never defined
+#   sdp/model/detr/main.py:118            F821 `get_args_parser`
+#   sdp/policy/bet_lowdim_policy.py:91    F821 `total_mse_loss`
+#   sdp/workspace/acc_train_step_workspace.py:447,454          F821 `_copy_to_cpu`, `payload`
+#   sdp/workspace/train_dp3_custom_optim_workspace.py:403,410,506  F821 `_copy_to_cpu`, `payload`, `TrainDP3Workspace`
+#   sdp/workspace/train_dp3_workspace.py:399,406               F821 `_copy_to_cpu`, `payload`
+#   sdp/workspace/train_equibot_workspace.py:399,406,502       F821 `_copy_to_cpu`, `payload`, `TrainSTEPWorkspace`
+#   sdp/workspace/train_step_workspace.py:399,406              F821 `_copy_to_cpu`, `payload`
+# ---------------------------------------------------------------------------
+[lint.per-file-ignores]
+"sdp/common/pymunk_override.py" = ["F822"]
+"sdp/model/detr/main.py" = ["F821"]
+"sdp/policy/bet_lowdim_policy.py" = ["F821"]
+"sdp/workspace/acc_train_step_workspace.py" = ["F821"]
+"sdp/workspace/train_dp3_custom_optim_workspace.py" = ["F821"]
+"sdp/workspace/train_dp3_workspace.py" = ["F821"]
+"sdp/workspace/train_equibot_workspace.py" = ["F821"]
+"sdp/workspace/train_step_workspace.py" = ["F821"]

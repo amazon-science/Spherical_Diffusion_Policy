@@ -1,0 +1,122 @@
+###############################################################################
+# requirements.txt
+#
+# PURPOSE: give this repository a non-empty GitHub dependency graph.
+#
+# Before this file existed, the graph was EMPTY: GitHub's dependency graph does
+# not parse conda environment files, and both setup.py files declare no
+# install_requires. With an empty graph no Dependabot alert can ever be raised,
+# and therefore no automated security fix could ever be opened. This file is
+# what makes the repository's `auto-merge` security remediation path able to
+# function at all.
+#
+# SCOPE: this is the PIP-INSTALLABLE SUBSET of the project's dependencies, and
+# it is the exact set that .github/workflows/ci.yml installs and tests. That
+# coupling is deliberate: Dependabot edits this file, so CI must exercise this
+# file, or an auto-merged bump would be merged untested.
+#
+# `conda_environment.yaml` remains the AUTHORITATIVE environment for reproducing
+# the paper's results:
+#
+#     mamba env create -f conda_environment.yaml && conda activate sdp
+#
+# Install this file with the CPU wheel index first, as CI does:
+#
+#     pip install --index-url https://download.pytorch.org/whl/cpu \
+#                 --extra-index-url https://pypi.org/simple \
+#                 -r requirements.txt
+#
+# NOT LISTED HERE, and therefore NOT covered by Dependabot alerts. Recorded so
+# that an absence of alerts is not mistaken for an absence of risk; see
+# SECURITY.md:
+#   pytorch3d==0.7.5   conda channel only; 0.7.5 does not exist on PyPI
+#   dgl                taken from the dglteam/label/th21_cu118 conda channel
+#   pytorch-cluster    PyPI ships sdist only; compiles against installed torch
+#   pytorch-scatter    PyPI ships sdist only; compiles against installed torch
+#   gym==0.21.0        PyPI ships sdist only; its setup.py fails on modern pip
+#   av==10.0.0         PyPI ships sdist only; needs FFmpeg development headers
+#   open3d             needs system GL; 0.20.0+ requires python >= 3.10
+#   pytorch-cuda=11.8  conda metapackage (nvidia channel); no PyPI equivalent
+#   llvm-openmp=14     conda-forge only; no PyPI equivalent
+#   robosuite, robomimic, robosuite-task-zoo
+#                      pinned to immutable GitHub archive commits, two of them
+#                      against personal forks. A commit-pinned direct reference
+#                      has no version series, so Dependabot cannot bump it in
+#                      any form. They also need MuJoCo. Reviewed by hand.
+#
+# Imported by the tree but declared in NO manifest, so still invisible to the
+# graph. Left out only because their versions are unverified; worth a follow-up:
+#   pandas    sdp/common/json_logger.py:6, sdp/model/detr/util/plot_utils.py:5
+#   seaborn   sdp/model/detr/util/plot_utils.py:7
+#   filelock  sdp/dataset/robomimic_replay_image_dataset.py:12
+#   atomics   sdp/shared_memory/shared_memory_util.py:5
+#
+# Deliberately omitted as non-runtime: pip, python (interpreter), ipykernel
+# (notebook tooling), Cython and cmake (build tooling, alert noise with no
+# security value), scikit-video (declared by conda_environment.yaml but never
+# imported anywhere in the tree).
+#
+# Also omitted: datasets==2.6.1. Two independent reasons. It is imported by none
+# of the repository's 172 modules, and it requires pyarrow, which no longer
+# publishes a cp39 wheel, so pip falls back to building pyarrow from source and
+# the install fails for want of cmake. Measured: including it made the whole
+# install abort, which would have left CI permanently red and blocked every
+# Dependabot security pull request.
+###############################################################################
+
+# --- core numerics -----------------------------------------------------------
+# conda `pytorch` -> PyPI `torch`. CI resolves these from the CPU wheel index.
+torch==2.1.0
+torchvision==0.16.0
+torchaudio==2.1.0
+numpy==1.23.3
+scipy==1.9.1
+numba==0.56.4
+
+# --- the SE(3)/spherical-Fourier core ----------------------------------------
+# These two carry the paper's central claim and are what tests/
+# test_sdp_equivariance.py exercises. e3nn is UNVERSIONED in
+# conda_environment.yaml; 0.5.1 is the release contemporary with torch 2.1.0
+# (the next release, 0.5.2, did not appear until 2024-10-31). escnn is also
+# unversioned upstream; 1.0.11 is the newest that exists.
+e3nn==0.5.1
+escnn==1.0.11
+
+# --- configuration and array plumbing ----------------------------------------
+hydra-core==1.2.0
+einops==0.4.1
+zarr==2.12.0
+numcodecs==0.10.2
+h5py==3.7.0
+dill==0.3.5.1
+
+# --- utilities ---------------------------------------------------------------
+termcolor==2.0.1
+tqdm==4.64.1
+threadpoolctl==3.1.0
+psutil==5.9.2
+click==8.0.4
+cffi==1.15.1
+
+# --- imaging and geometry ----------------------------------------------------
+# conda `py-opencv=4.6.0` -> PyPI `opencv-python`, which uses four-component
+# versions; 4.6.0.66 is the only 4.6.0.* release.
+opencv-python==4.6.0.66
+scikit-image==0.19.3
+imageio==2.22.0
+imageio-ffmpeg==0.4.7
+# conda_environment.yaml pins imagecodecs twice; the pip entry (2022.9.26)
+# deliberately supersedes the conda one (2022.8.8), so this is the effective one.
+imagecodecs==2022.9.26
+shapely==1.8.4
+pymunk==6.2.1
+matplotlib==3.6.1
+
+# --- training / experiment tracking ------------------------------------------
+tensorboard==2.10.1
+# conda `tensorboardx` -> the canonical PyPI name capitalises the X.
+tensorboardX==2.5.1
+accelerate==0.13.2
+diffusers==0.11.1
+boto3==1.24.96
+wandb==0.17.0

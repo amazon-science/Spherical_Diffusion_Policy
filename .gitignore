@@ -1,0 +1,15 @@
+# Added alongside the test suite: running pytest generates bytecode and tool
+# caches throughout the tree, and this repository previously had no .gitignore,
+# so those artefacts showed up as untracked files.
+__pycache__/
+*.py[cod]
+*$py.class
+
+# test and lint caches
+.pytest_cache/
+.ruff_cache/
+
+# build artefacts from `pip install -e .`
+*.egg-info/
+build/
+dist/
