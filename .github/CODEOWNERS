@@ -1,0 +1,12 @@
+# Owner of record for this repository.
+#
+# This file establishes who is accountable for the repository. It does NOT, on its own, require
+# review on a pull request: review is only mandatory if branch protection has
+# "Require review from Code Owners" switched on.
+#
+# IMPORTANT, and easy to get wrong: do NOT enable "Require review from Code Owners" on `main`.
+# A required code-owner review cannot be satisfied by the Dependabot Auto-Merge app, so turning it on
+# would silently prevent every automated security fix from ever merging -- which is the opposite of
+# what the auto-merge remediation path is for. Gate merges on the required CI status check instead.
+
+* @fanwanf

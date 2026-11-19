@@ -1,0 +1,100 @@
+# CI for Spherical_Diffusion_Policy.
+#
+# Why this exists: the repository's security remediation path is `auto-merge`, which means Dependabot
+# security pull requests merge WITHOUT human review once CI passes. This workflow is therefore the
+# only thing standing between an automated dependency bump and a published research artifact, so it
+# is designed to be able to genuinely FAIL rather than to look green.
+#
+# Design constraints, which are real and not incidental:
+#   * The full environment in conda_environment.yaml CANNOT be installed on a GitHub-hosted runner.
+#     pytorch3d, dgl, pytorch-cluster and pytorch-scatter come from conda channels; robosuite /
+#     robomimic / robosuite-task-zoo need MuJoCo; open3d needs GL; gym 0.21.0 does not build under
+#     modern pip. CI therefore installs requirements.txt, the pip-resolvable subset.
+#   * CI installs THE SAME manifest Dependabot edits (requirements.txt). That coupling is the whole
+#     point: a bump Dependabot writes is a bump this workflow actually exercises. If CI installed a
+#     separate pinned file, auto-merge would be testing something other than the change being merged.
+#   * Jobs are named `lint` and `test` because those names are the status-check contexts you must mark
+#     as required in branch protection on `main`.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege: nothing here needs write access to the repository.
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: lint
+    # PINNED, do not change to ubuntu-latest. conda_environment.yaml pins
+    # python=3.9, which reached end of life in October 2025, and
+    # actions/python-versions therefore stopped building it for newer images:
+    # 3.9 exists for Ubuntu 16.04 through 24.04 and NOT for 26.04. When
+    # ubuntu-latest rolled to 26.04 this job failed with "The version '3.9' with
+    # architecture 'x64' was not found for Ubuntu 26.04". 24.04 is the newest
+    # image that still has 3.9. Moving off 3.9 is the real fix; until then the
+    # image has to be explicit.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+
+      # Pinned to the version this gate was verified against. Dependabot's
+      # github-actions ecosystem does not manage packages installed in a run
+      # step, so this pin is updated by hand.
+      - name: Install ruff
+        run: python -m pip install --disable-pip-version-check "ruff==0.17.5"
+
+      # Rule selection and the baseline of pre-existing defects live in
+      # .ruff.toml, so this stays a plain `ruff check` and the config is the
+      # single source of truth. See that file for why the rule set is narrow.
+      - name: Lint for real errors (syntax, undefined names, broken comparisons)
+        run: ruff check --output-format=concise .
+
+  test:
+    name: test
+    # Pinned for the same reason as the lint job: Ubuntu 26.04 has no python 3.9.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.9"
+          cache: pip
+
+      - name: Upgrade pip
+        run: python -m pip install --disable-pip-version-check --upgrade pip
+
+      # The CPU wheel index must be PRIMARY, not an extra index. Measured: with
+      # PyPI primary, pip resolves torch to the CUDA build (2.5 GB of nvidia-*
+      # wheels) on a runner with no GPU. The pinned VERSION still comes from
+      # requirements.txt, so a Dependabot bump is honoured; only the build varies.
+      - name: Install pip-resolvable dependencies
+        run: |
+          pip install \
+            --index-url https://download.pytorch.org/whl/cpu \
+            --extra-index-url https://pypi.org/simple \
+            -r requirements.txt
+
+      - name: Install test dependencies
+        run: pip install -r requirements-dev.txt
+
+      - name: Show resolved environment
+        run: pip freeze
+
+      - name: Run tests
+        run: pytest tests -v --durations=10

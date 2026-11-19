@@ -1,0 +1,7 @@
+# Test-only dependencies. Kept separate from requirements.txt so that the
+# project's real dependency set, which is what Dependabot alerts on, is not
+# diluted with CI tooling.
+#
+# ruff is NOT listed here: the lint job installs it directly so that a ruff
+# release cannot change the test environment's resolution.
+pytest==8.3.3
