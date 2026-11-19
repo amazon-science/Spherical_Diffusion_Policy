@@ -115,7 +115,16 @@ matplotlib==3.6.1
 # --- training / experiment tracking ------------------------------------------
 tensorboard==2.10.1
 # conda `tensorboardx` -> the canonical PyPI name capitalises the X.
-tensorboardX==2.6.5
+#
+# DO NOT BUMP THIS PAST 2.5.1 WHILE tensorboard IS PINNED TO 2.10.1.
+# The two disagree about protobuf and the conflict is irreconcilable:
+#   tensorboard  == 2.10.1  requires  protobuf <3.20, >=3.9.2
+#   tensorboardX == 2.6.5   requires  protobuf >=3.20
+# Dependabot bumped this 2.5.1 -> 2.6.5 (PR #9) and the install step failed to
+# resolve, turning CI red on main. Bumping tensorboardX therefore requires
+# bumping tensorboard in the same change. Note also that tensorboardX is
+# imported by none of the 172 modules in this repository.
+tensorboardX==2.5.1
 accelerate==0.13.2
 diffusers==0.11.1
 boto3==1.24.96

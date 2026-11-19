@@ -33,7 +33,21 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    # VERSION updates are disabled; SECURITY updates are not affected.
+    #
+    # This is the correct instrument for that, and `ignore` is not: GitHub's
+    # options reference marks open-pull-requests-limit "Version updates only",
+    # whereas `ignore` is marked as also changing how security pull requests are
+    # created. So a limit of 0 silences proactive bumps while leaving every
+    # security advisory free to open a fix pull request.
+    #
+    # Why: on first enablement Dependabot opened 10 version-update pull requests
+    # against a frozen ICML 2025 artifact within minutes, including
+    # torch 2.1.0 -> 2.13.0, which would change the numerics of published
+    # results. One merged bump (tensorboardx 2.5.1 -> 2.6.5) turned CI red
+    # through a protobuf conflict. Proactive version churn has no security value
+    # on a repository pinned for reproducibility; a CVE fix still arrives.
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
       - "python"
@@ -46,6 +60,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    # Disabled for the same reason, and with the same security-update exemption.
+    # Dependabot bumped actions/setup-python from v5 to v7 here; that one did
+    # install cleanly, but v7.0.0's release notes say "Remove EOL Python
+    # versions", and this project pins python 3.9, which is EOL. An unreviewed
+    # major bump of the action that provisions the interpreter is exactly the
+    # change that should not land automatically.
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
       - "github-actions"
