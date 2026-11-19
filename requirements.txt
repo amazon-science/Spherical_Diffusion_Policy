@@ -110,7 +110,7 @@ imageio-ffmpeg==0.4.7
 imagecodecs==2022.9.26
 shapely==1.8.4
 pymunk==6.2.1
-matplotlib==3.6.1
+matplotlib==3.11.2
 
 # --- training / experiment tracking ------------------------------------------
 tensorboard==2.10.1
