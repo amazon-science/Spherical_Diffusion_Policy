@@ -83,7 +83,7 @@ e3nn==0.5.1
 escnn==1.0.11
 
 # --- configuration and array plumbing ----------------------------------------
-hydra-core==1.2.0
+hydra-core==1.3.8
 einops==0.4.1
 zarr==2.12.0
 numcodecs==0.10.2
