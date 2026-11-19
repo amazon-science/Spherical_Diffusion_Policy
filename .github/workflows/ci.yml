@@ -34,7 +34,15 @@ concurrency:
 jobs:
   lint:
     name: lint
-    runs-on: ubuntu-latest
+    # PINNED, do not change to ubuntu-latest. conda_environment.yaml pins
+    # python=3.9, which reached end of life in October 2025, and
+    # actions/python-versions therefore stopped building it for newer images:
+    # 3.9 exists for Ubuntu 16.04 through 24.04 and NOT for 26.04. When
+    # ubuntu-latest rolled to 26.04 this job failed with "The version '3.9' with
+    # architecture 'x64' was not found for Ubuntu 26.04". 24.04 is the newest
+    # image that still has 3.9. Moving off 3.9 is the real fix; until then the
+    # image has to be explicit.
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
@@ -57,7 +65,8 @@ jobs:
 
   test:
     name: test
-    runs-on: ubuntu-latest
+    # Pinned for the same reason as the lint job: Ubuntu 26.04 has no python 3.9.
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4

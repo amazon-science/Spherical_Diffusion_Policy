@@ -43,7 +43,10 @@ Stated explicitly so that an absence of alerts is not mistaken for an absence of
   project includes code copied from EquiformerV2, Equivariant Diffusion Policy, Diffusion Policy, ACT
   and MimicGen. Copied source is not a declared dependency and is not scanned by Dependabot.
 - **The pinned interpreter is `python=3.9`**, which reached end of life in October 2025 and therefore
-  no longer receives upstream security patches.
+  no longer receives upstream security patches. This already has an operational consequence:
+  `actions/python-versions` no longer builds 3.9 for GitHub's newer runner images (it exists for
+  Ubuntu 16.04 through 24.04, but not 26.04), so `.github/workflows/ci.yml` must pin
+  `runs-on: ubuntu-24.04` instead of using `ubuntu-latest`. Moving off 3.9 is the real fix.
 
 Reproducing the paper's reported results requires the exact pinned environment in
 `conda_environment.yaml`. Upgrading dependencies may change numerical results.
