@@ -118,5 +118,5 @@ tensorboard==2.10.1
 tensorboardX==2.5.1
 accelerate==0.13.2
 diffusers==0.11.1
-boto3==1.24.96
+boto3==1.44.3
 wandb==0.17.0
