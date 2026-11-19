@@ -107,7 +107,7 @@ imageio==2.22.0
 imageio-ffmpeg==0.4.7
 # conda_environment.yaml pins imagecodecs twice; the pip entry (2022.9.26)
 # deliberately supersedes the conda one (2022.8.8), so this is the effective one.
-imagecodecs==2022.9.26
+imagecodecs==2026.11.11
 shapely==1.8.4
 pymunk==6.2.1
 matplotlib==3.6.1
